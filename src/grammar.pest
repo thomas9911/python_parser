@@ -1,0 +1,34 @@
+// python = _{SOI ~ block ~ EOI}
+// block = { line+ ~ newline? }
+
+// line = _{ ((indent* ~ item)? ~ newline) }
+item = { class | function | variable }
+
+
+variable = { no_digit ~ char{, 255} }
+
+class = { "class " ~ classname ~ inheritance? ~ ":" ~ newline ~ block }
+    classname = { variable }
+    inheritance = { "(" ~ variable ~ ("," ~ spaces ~ variable)* ~ ","? ~ ")" }
+
+function = { "def " ~ functionname ~ arguments ~ ":" ~ newline ~ block }
+    functionname = { variable }
+    arguments = { "(" ~ variable ~ ("," ~ spaces ~ variable)* ~ ","? ~ ")" }
+
+char = _{ no_digit | numbers }
+    no_digit = _{ ASCII_ALPHA | "_" }
+    numbers = _{ ASCII_DIGIT }
+
+newline = _{ spaces ~ NEWLINE }
+spaces = _{ " "* }
+indent = { "  " }
+
+
+// stack test
+
+python = _{SOI ~ document ~ EOI}
+document = _{ (part | newline)+ }
+part = { block+ }
+block = { first_line ~ (line | newline )* }
+first_line = _{ PUSH(indent)* ~ item }
+line = _{ PEEK_ALL  ~ item }
